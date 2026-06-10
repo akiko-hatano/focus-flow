@@ -1,6 +1,6 @@
 # FocusFlow
 
-Playwright MCP や browser use などの自動化ツール向けサンプル TODO アプリです。
+Playwright MCP や browser use などの自動化ツール検証用の サンプル TODO アプリです。
 
 ## 技術スタック
 
