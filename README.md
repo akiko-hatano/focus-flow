@@ -46,3 +46,11 @@ pnpm lint         # Lint
 ## Node.js
 
 Node.js `22.22.0`（mise で管理）
+
+## キャプチャ
+
+<img width="800" alt="スクリーンショット 2026-06-10 18 18 52" src="https://github.com/user-attachments/assets/01fb3999-7a4d-46ad-a2f7-d966d5d66517" />
+
+<img width="800" alt="スクリーンショット 2026-06-10 18 18 59" src="https://github.com/user-attachments/assets/28f4059c-0cb8-4fa6-a17b-07cbebee8229" />
+
+<img width="800" alt="スクリーンショット 2026-06-10 18 19 10" src="https://github.com/user-attachments/assets/f10943d1-cad9-4a07-93d1-92aff3b491af" />
