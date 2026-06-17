@@ -52,7 +52,7 @@ async function main() {
       "ページに表示されているタスクのタイトルをすべて取得して",
       z.object({ tasks: z.array(z.string()).describe("タスクのタイトル一覧") }),
     );
-    if (!tasks.some((t) => t.includes("Stagehand"))) fail(`"${TASK_TITLE}" が一覧に見つかりません`);
+    if (!tasks.some((t) => t.includes(TASK_TITLE))) fail(`"${TASK_TITLE}" が一覧に見つかりません`);
     ok(`タスク確認: ${tasks.join(", ")}`);
 
     // ─────────────────────────────────────────
@@ -78,7 +78,7 @@ async function main() {
       `"updated" という文字を含むタスクのタイトルを取得して`,
       z.object({ title: z.string().describe("更新後のタスクタイトル") }),
     );
-    if (!title.includes("updated")) fail(`タイトルが更新されていません: "${title}"`);
+    if (!title.includes(UPDATED_TITLE)) fail(`タイトルが更新されていません: "${title}"`);
     ok(`タイトル更新成功: "${title}"`);
 
     // ─────────────────────────────────────────
@@ -90,7 +90,7 @@ async function main() {
       "ページに表示されているタスクのタイトルをすべて取得して。タスクがなければ空の配列を返して",
       z.object({ tasks: z.array(z.string()).describe("残っているタスク一覧") }),
     );
-    if (remainingTasks.some((t) => t.includes("Stagehand"))) fail("削除されていません");
+    if (remainingTasks.some((t) => t.includes(UPDATED_TITLE))) fail("削除されていません");
     ok("削除成功");
 
     // ─────────────────────────────────────────
