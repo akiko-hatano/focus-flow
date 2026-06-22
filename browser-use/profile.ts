@@ -30,7 +30,7 @@ async function main(): Promise<void> {
       browser,
     }).run(15);
     const updateFinal = (updateResult.final_result() ?? "").toLowerCase();
-    if (updateFinal.includes("not saved")) {
+    if (updateFinal.includes("not saved") || !updateFinal.includes("saved")) {
       fail(`保存が確認できません: ${updateResult.final_result()}`);
     }
     ok('保存成功: "Updated!"');
@@ -82,7 +82,7 @@ async function main(): Promise<void> {
       browser,
     }).run(10);
     const cancelFinal = (cancelResult.final_result() ?? "").toLowerCase();
-    if (cancelFinal.includes("not reset")) {
+    if (cancelFinal.includes("not reset") || !cancelFinal.includes("reset")) {
       fail(`Cancel が効いていません: ${cancelResult.final_result()}`);
     }
     ok("Cancel でリセット成功");

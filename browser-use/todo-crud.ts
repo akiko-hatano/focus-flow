@@ -6,7 +6,6 @@
  *
  * 事前準備:
  *   pnpm dev でアプリを起動しておく
- *   pnpm browser-use:install
  */
 
 import { fail, getLlm, log, makeAgent, makeBrowser, ok } from "./config";
@@ -46,7 +45,7 @@ async function main(): Promise<void> {
       browser,
     }).run(5);
     const readFinal = (readResult.final_result() ?? "").toLowerCase();
-    if (readFinal.includes("not found")) {
+    if (readFinal.includes("not found") || !readFinal.includes("found")) {
       fail(`"${TASK_TITLE}" が一覧に見つかりません`);
     }
     ok(`タスク確認: "${TASK_TITLE}" が一覧に存在する`);
@@ -61,7 +60,7 @@ async function main(): Promise<void> {
       browser,
     }).run(10);
     const completeFinal = (completeResult.final_result() ?? "").toLowerCase();
-    if (completeFinal.includes("not completed")) {
+    if (completeFinal.includes("not completed") || !completeFinal.includes("completed")) {
       fail("完了状態になっていません");
     }
     ok("完了状態に変更成功");
@@ -78,7 +77,7 @@ async function main(): Promise<void> {
       browser,
     }).run(15);
     const editFinal = (editResult.final_result() ?? "").toLowerCase();
-    if (editFinal.includes("not updated")) {
+    if (editFinal.includes("not updated") || !editFinal.includes("updated")) {
       fail(`タイトルが更新されていません: ${editResult.final_result()}`);
     }
     ok(`タイトル更新成功: "${UPDATED_TITLE}"`);
@@ -93,7 +92,7 @@ async function main(): Promise<void> {
       browser,
     }).run(10);
     const deleteFinal = (deleteResult.final_result() ?? "").toLowerCase();
-    if (deleteFinal.includes("not deleted")) {
+    if (deleteFinal.includes("not deleted") || !deleteFinal.includes("deleted")) {
       fail("削除されていません");
     }
     ok("削除成功");
@@ -123,7 +122,7 @@ async function main(): Promise<void> {
       browser,
     }).run(10);
     const valEditAddFinal = (valEditAddResult.final_result() ?? "").toLowerCase();
-    if (valEditAddFinal.includes("not added")) {
+    if (valEditAddFinal.includes("not added") || !valEditAddFinal.includes("added")) {
       fail(`"${VALIDATION_TASK_TITLE}" を追加できませんでした`);
     }
     ok(`"${VALIDATION_TASK_TITLE}" を追加した`);
@@ -155,7 +154,7 @@ async function main(): Promise<void> {
       browser,
     }).run(10);
     const valEditCleanupFinal = (valEditCleanupResult.final_result() ?? "").toLowerCase();
-    if (valEditCleanupFinal.includes("not cleaned up")) {
+    if (valEditCleanupFinal.includes("not cleaned up") || !valEditCleanupFinal.includes("cleaned up")) {
       fail(`"${VALIDATION_TASK_TITLE}" の後片付けができませんでした`);
     }
     ok(`"${VALIDATION_TASK_TITLE}" を削除した`);

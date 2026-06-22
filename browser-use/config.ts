@@ -11,8 +11,8 @@ import { ChatBedrockConverse } from "browser-use/llm/aws";
  */
 
 const EXTEND_SYSTEM_MESSAGE =
-  "作業言語は日本語です。" +
-  "Evaluation、Memory、Next Goal、最終結果はすべて日本語で記述してください。";
+  "Evaluation、Memory、Next Goal は日本語で記述してください。" +
+  "最終結果（final result）はタスク内で指定したキーワードをそのまま英語で返してください。";
 
 export function getLlm(): { llm: ChatBedrockConverse; modelId: string } {
   const region = process.env.AWS_REGION;

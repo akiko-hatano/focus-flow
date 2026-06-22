@@ -44,7 +44,7 @@ async function main(): Promise<void> {
       browser,
     }).run(10);
     const switchFinal = (switchResult.final_result() ?? "").toLowerCase();
-    if (switchFinal.includes("not changed")) {
+    if (switchFinal.includes("not changed") || !switchFinal.includes("changed to")) {
       fail("テーマが変わっていません");
     }
     ok(`テーマ変更成功: "${currentTheme}" → ${switchResult.final_result()}`);
