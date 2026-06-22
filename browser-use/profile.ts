@@ -88,14 +88,14 @@ async function main(): Promise<void> {
     ok("Cancel でリセット成功");
 
     console.log("\n🎉 Profile テスト完了！\n");
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(`\n${error.message}`);
-    }
-    process.exit(1);
   } finally {
     await browser.kill();
   }
 }
 
-main();
+main().catch((error) => {
+  if (error instanceof Error) {
+    console.error(`\n${error.message}`);
+  }
+  process.exit(1);
+});

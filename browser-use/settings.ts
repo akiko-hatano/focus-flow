@@ -50,14 +50,14 @@ async function main(): Promise<void> {
     ok(`テーマ変更成功: "${currentTheme}" → ${switchResult.final_result()}`);
 
     console.log("\n🎉 Settings テスト完了！\n");
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(`\n${error.message}`);
-    }
-    process.exit(1);
   } finally {
     await browser.kill();
   }
 }
 
-main();
+main().catch((error) => {
+  if (error instanceof Error) {
+    console.error(`\n${error.message}`);
+  }
+  process.exit(1);
+});

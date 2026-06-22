@@ -24,7 +24,7 @@ async function main(): Promise<void> {
 
   try {
     log("CREATE", `"${TASK_TITLE}" を追加する`);
-    await makeAgent({
+    const createResult = await makeAgent({
       task:
         `${APP_URL} を開いて、` +
         `"Add a new task..." の入力欄に "${TASK_TITLE}" と入力し、` +
@@ -33,7 +33,11 @@ async function main(): Promise<void> {
       llm,
       browser,
     }).run(10);
-    ok("タスク追加操作完了");
+    const createFinal = (createResult.final_result() ?? "").toLowerCase();
+    if (createFinal.includes("fail") || !createFinal.includes("success")) {
+      fail(`タスク追加に失敗しました: ${createResult.final_result()}`);
+    }
+    ok("タスクを追加した");
 
     log("READ", "タスク一覧を確認する");
     const readResult = await makeAgent({
@@ -160,14 +164,14 @@ async function main(): Promise<void> {
     ok(`"${VALIDATION_TASK_TITLE}" を削除した`);
 
     console.log("\n🎉 CRUD テスト完了！\n");
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(`\n${error.message}`);
-    }
-    process.exit(1);
   } finally {
     await browser.kill();
   }
 }
 
-main();
+main().catch((error) => {
+  if (error instanceof Error) {
+    console.error(`\n${error.message}`);
+  }
+  process.exit(1);
+});
