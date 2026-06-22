@@ -66,7 +66,6 @@ async function main(): Promise<void> {
       browser,
     }).run(10);
     const emailFinal = (emailResult.final_result() ?? "").toLowerCase();
-    console.log(`  [debug] email final_result: "${emailFinal}"`);
     if (!emailFinal.includes("error shown")) {
       fail('"有効なメールアドレスを入力してください" が表示されていません');
     }

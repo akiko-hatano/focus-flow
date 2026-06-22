@@ -18,14 +18,8 @@ export function getLlm(): { llm: ChatBedrockConverse; modelId: string } {
   const region = process.env.AWS_REGION;
   const modelId = process.env.AWS_BEDROCK_MODEL_ARN_ID;
 
-  if (!region) {
-    console.error("❌ 環境変数 AWS_REGION が設定されていません");
-    process.exit(1);
-  }
-  if (!modelId) {
-    console.error("❌ 環境変数 AWS_BEDROCK_MODEL_ARN_ID が設定されていません");
-    process.exit(1);
-  }
+  if (!region) throw new Error("環境変数 AWS_REGION が設定されていません");
+  if (!modelId) throw new Error("環境変数 AWS_BEDROCK_MODEL_ARN_ID が設定されていません");
 
   const llm = new ChatBedrockConverse({
     model: modelId,

@@ -10,7 +10,6 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "postinstall": "playwright install chromium",
     "browser-use:todo": "tsx --env-file .env.local browser-use/todo-crud.ts",
     "browser-use:profile": "tsx --env-file .env.local browser-use/profile.ts",
     "browser-use:settings": "tsx --env-file .env.local browser-use/settings.ts"
