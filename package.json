@@ -10,9 +10,9 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "playwright-mcp:todo": "tsx --env-file .env.local playwright-mcp/todo-crud.ts 2>/dev/null",
-    "playwright-mcp:profile": "tsx --env-file .env.local playwright-mcp/profile.ts 2>/dev/null",
-    "playwright-mcp:settings": "tsx --env-file .env.local playwright-mcp/settings.ts 2>/dev/null"
+    "playwright-mcp:todo": "tsx playwright-mcp/todo-crud.ts",
+    "playwright-mcp:profile": "tsx playwright-mcp/profile.ts",
+    "playwright-mcp:settings": "tsx playwright-mcp/settings.ts"
   },
   "dependencies": {
     "jotai": "2.20.0",
@@ -34,7 +34,6 @@
     "eslint": "10.4.1",
     "eslint-config-next": "16.2.9",
     "jsdom": "29.1.1",
-    "playwright": "^1.61.0",
     "tailwindcss": "4.3.0",
     "tsx": "^4.22.4",
     "typescript": "6.0.3",

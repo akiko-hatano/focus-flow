@@ -76,7 +76,7 @@ export async function snapshot(client: Client): Promise<string> {
   return content.map((c) => c.text).join("\n");
 }
 
-function parseEvalResult(content: Array<{ type: string; text: string }>): string {
+export function parseEvalResult(content: Array<{ type: string; text: string }>): string {
   const raw = content.map((c) => c.text).join("");
   // Response format: "### Result\n\"value\"\n### Ran Playwright code\n..."
   const match = raw.match(/###\s*Result\s*\n([\s\S]*?)(?:\n###|$)/);
@@ -90,7 +90,7 @@ export async function getTextContent(client: Client, selector: string): Promise<
   const result = await client.callTool({
     name: "browser_evaluate",
     arguments: {
-      function: `() => document.querySelector('${selector}')?.textContent?.trim() ?? ""`,
+      function: `() => document.querySelector(${JSON.stringify(selector)})?.textContent?.trim() ?? ""`,
     },
   });
   return parseEvalResult(result.content as Array<{ type: string; text: string }>);
@@ -100,7 +100,7 @@ export async function isVisible(client: Client, selector: string): Promise<boole
   const result = await client.callTool({
     name: "browser_evaluate",
     arguments: {
-      function: `() => !!document.querySelector('${selector}')`,
+      function: `() => !!document.querySelector(${JSON.stringify(selector)})`,
     },
   });
   const val = parseEvalResult(result.content as Array<{ type: string; text: string }>);
@@ -115,7 +115,7 @@ export async function getAttribute(
   const result = await client.callTool({
     name: "browser_evaluate",
     arguments: {
-      function: `() => document.querySelector('${selector}')?.getAttribute('${attr}') ?? ""`,
+      function: `() => document.querySelector(${JSON.stringify(selector)})?.getAttribute(${JSON.stringify(attr)}) ?? ""`,
     },
   });
   return parseEvalResult(result.content as Array<{ type: string; text: string }>);
@@ -125,7 +125,7 @@ export async function getValue(client: Client, selector: string): Promise<string
   const result = await client.callTool({
     name: "browser_evaluate",
     arguments: {
-      function: `() => { const el = document.querySelector('${selector}'); return el ? el.value : ""; }`,
+      function: `() => { const el = document.querySelector(${JSON.stringify(selector)}); return el && "value" in el ? el.value : ""; }`,
     },
   });
   return parseEvalResult(result.content as Array<{ type: string; text: string }>);

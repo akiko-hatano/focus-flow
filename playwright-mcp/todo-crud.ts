@@ -41,7 +41,7 @@ async function getTaskIdByTitle(client: Client, title: string): Promise<string> 
           const testId = item.getAttribute('data-testid') ?? '';
           const id = testId.replace('task-item-', '');
           const titleEl = item.querySelector('[data-testid="task-title-' + id + '"]');
-          if (titleEl?.textContent?.includes(${JSON.stringify(title)})) return id;
+          if (titleEl?.textContent?.trim() === ${JSON.stringify(title)}) return id;
         }
         return '';
       }`,

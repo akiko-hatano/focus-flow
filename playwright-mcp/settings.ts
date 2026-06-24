@@ -9,17 +9,9 @@
  */
 
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { click, createMcpClient, fail, log, navigate, ok, waitFor } from "./config";
+import { click, createMcpClient, fail, log, navigate, ok, parseEvalResult, waitFor } from "./config";
 
 const APP_URL = "http://localhost:3000/settings";
-
-// MCP ツールの browser_evaluate レスポンスから結果値だけを取り出すパーサー
-function parseEvalResult(content: Array<{ type: string; text: string }>): string {
-  const raw = content.map((c) => c.text).join("");
-  const match = raw.match(/###\s*Result\s*\n([\s\S]*?)(?:\n###|$)/);
-  const val = match ? match[1].trim() : raw.trim();
-  return val.replace(/^"|"$/g, "");
-}
 
 // 「選択中: Indigo」のような表示テキストからテーマ名だけを取り出す
 async function getSelectedThemeLabel(client: Client): Promise<string> {
