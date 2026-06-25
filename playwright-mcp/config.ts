@@ -49,25 +49,14 @@ export async function clearAndType(
   text: string,
   description: string,
 ): Promise<void> {
-  if (text) {
-    // テキストがある場合は browser_fill_form で一括入力（React onChange を正しく発火）
-    await client.callTool({
-      name: "browser_fill_form",
-      arguments: {
-        fields: [{ element: description, target: selector, name: description, type: "textbox", value: text }],
-      },
-    });
-  } else {
-    // 空文字にする場合: スペースで fill してから Backspace で削除（React 対応）
-    await client.callTool({
-      name: "browser_type",
-      arguments: { element: description, target: selector, text: " " },
-    });
-    await client.callTool({
-      name: "browser_press_key",
-      arguments: { key: "Backspace" },
-    });
-  }
+  // browser_fill_form で value を直接セット（React onChange を正しく発火）
+  // 空文字の場合も同じ方式で統一する
+  await client.callTool({
+    name: "browser_fill_form",
+    arguments: {
+      fields: [{ element: description, target: selector, name: description, type: "textbox", value: text }],
+    },
+  });
 }
 
 export async function snapshot(client: Client): Promise<string> {
@@ -100,7 +89,13 @@ export async function isVisible(client: Client, selector: string): Promise<boole
   const result = await client.callTool({
     name: "browser_evaluate",
     arguments: {
-      function: `() => !!document.querySelector(${JSON.stringify(selector)})`,
+      // display:none や visibility:hidden の要素は false とみなす
+      function: `() => {
+        const el = document.querySelector(${JSON.stringify(selector)});
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== "none" && style.visibility !== "hidden" && el.getBoundingClientRect().width > 0;
+      }`,
     },
   });
   const val = parseEvalResult(result.content as Array<{ type: string; text: string }>);

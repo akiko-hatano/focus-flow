@@ -99,6 +99,8 @@ async function main(): Promise<void> {
     log("CANCEL", "Cancel ボタンで変更をリセットする");
     await navigate(client, APP_URL);
     await waitFor(client, '[data-testid="profile-form"]');
+    // Cancel 前の元の値を取得しておき、Cancel 後に同じ値に戻ることを確認
+    const originalName = await getValue(client, '[data-testid="profile-name-input"]');
     await clearAndType(
       client,
       '[data-testid="profile-name-input"]',
@@ -107,7 +109,7 @@ async function main(): Promise<void> {
     );
     await click(client, '[data-testid="profile-cancel-btn"]', "Cancel ボタン");
     const nameValue = await getValue(client, '[data-testid="profile-name-input"]');
-    if (nameValue === "Changed Name") fail(`Cancel が効いていません: "${nameValue}"`);
+    if (nameValue !== originalName) fail(`Cancel が効いていません: "${nameValue}" (期待値: "${originalName}")`);
     ok(`Cancel でリセット成功: "${nameValue}"`);
 
     console.log("\n🎉 Profile テスト完了！\n");
