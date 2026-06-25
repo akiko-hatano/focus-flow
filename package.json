@@ -9,16 +9,21 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "playwright-mcp:todo": "tsx playwright-mcp/todo-crud.ts",
+    "playwright-mcp:profile": "tsx playwright-mcp/profile.ts",
+    "playwright-mcp:settings": "tsx playwright-mcp/settings.ts"
   },
   "dependencies": {
+    "jotai": "2.20.0",
     "next": "16.2.9",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "jotai": "2.20.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@playwright/mcp": "0.0.76",
     "@tailwindcss/postcss": "4.3.0",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -30,6 +35,7 @@
     "eslint-config-next": "16.2.9",
     "jsdom": "29.1.1",
     "tailwindcss": "4.3.0",
+    "tsx": "4.22.4",
     "typescript": "6.0.3",
     "vitest": "4.1.8"
   }

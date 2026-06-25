@@ -38,3 +38,6 @@ next-env.d.ts
 
 # vitest
 .vitest
+
+# 技術調査ガイド（個人用メモ、コミット不要）
+pr-guide.md
