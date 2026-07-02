@@ -9,13 +9,16 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "agent-browser:todo": "tsx agent-browser/todo-crud.ts",
+    "agent-browser:profile": "tsx agent-browser/profile.ts",
+    "agent-browser:settings": "tsx agent-browser/settings.ts"
   },
   "dependencies": {
+    "jotai": "2.20.0",
     "next": "16.2.9",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "jotai": "2.20.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -26,10 +29,12 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
+    "agent-browser": "0.31.1",
     "eslint": "10.4.1",
     "eslint-config-next": "16.2.9",
     "jsdom": "29.1.1",
     "tailwindcss": "4.3.0",
+    "tsx": "4.22.4",
     "typescript": "6.0.3",
     "vitest": "4.1.8"
   }
