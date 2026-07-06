@@ -52,13 +52,12 @@ export function typeText(selector: string, text: string): void {
 
 export function clearAndType(selector: string, text: string): void {
   // fill は DOM に直接値をセットするだけで React の onChange が発火しないため、
-  // カーソルを末尾に移動して Backspace で全消去してから実キーストロークで入力する
+  // Home → Shift+End で全選択して Backspace で消去してから実キーストロークで入力する
+  // （Control+a / Meta+a は agent-browser の press では選択が発生しないため使えない）
   click(selector);
-  cmd<{ pressed: string }>(["press", "End"]);
-  const current = getValue(selector);
-  for (let i = 0; i < current.length; i++) {
-    cmd<{ pressed: string }>(["press", "Backspace"]);
-  }
+  cmd<{ pressed: string }>(["press", "Home"]);
+  cmd<{ pressed: string }>(["press", "Shift+End"]);
+  cmd<{ pressed: string }>(["press", "Backspace"]);
   if (text) cmd<{ typed: string }>(["keyboard", "type", text]);
 }
 

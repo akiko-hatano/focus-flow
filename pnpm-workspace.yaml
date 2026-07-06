@@ -1,5 +1,6 @@
 allowBuilds:
   agent-browser: true
+  esbuild: true
   sharp: true
   unrs-resolver: true
 minimumReleaseAgeExclude:

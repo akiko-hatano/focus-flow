@@ -46,8 +46,8 @@ importers:
         specifier: 6.0.2
         version: 6.0.2(vite@8.0.16(@types/node@25.9.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
       agent-browser:
-        specifier: 0.31.1
-        version: 0.31.1
+        specifier: 0.27.0
+        version: 0.27.0
       eslint:
         specifier: 10.4.1
         version: 10.4.1(jiti@2.7.0)
@@ -1172,9 +1172,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  agent-browser@0.31.1:
-    resolution: {integrity: sha512-RjgfT0EsHe1oZQbwzUqJTPb7w3sU8DGbbAjMxLNI5dW1y0cc81TbVsqgjqQJmsy3GEbEcKe/ryARwmWGqJAXXQ==}
-    engines: {node: '>=24.0.0', pnpm: '>=11.0.0'}
+  agent-browser@0.27.0:
+    resolution: {integrity: sha512-mmHzVsYFVA6nshNNGJzg83aVMgKpf4h98ytY3pvtJB1Cot0ZyA2bfnkbSngGD56Azkj+GlhVH6qx9DfKOVE0yg==}
     hasBin: true
 
   ajv@6.15.0:
@@ -3546,7 +3545,7 @@ snapshots:
 
   acorn@8.16.0: {}
 
-  agent-browser@0.31.1: {}
+  agent-browser@0.27.0: {}
 
   ajv@6.15.0:
     dependencies:
