@@ -129,32 +129,38 @@ async function executeAction(
     case "left_mouse_up":
       await page.mouse.up();
       return { text: "mouse up" };
-    case "type":
-      await page.keyboard.type(input.text as string);
-      return { text: `typed: ${input.text as string}` };
-    case "key":
-      await page.keyboard.press(mapKey(input.text as string));
-      return { text: `pressed: ${input.text as string}` };
+    case "type": {
+      if (typeof input.text !== "string") return { text: "text is required", isError: true };
+      await page.keyboard.type(input.text);
+      return { text: `typed: ${input.text}` };
+    }
+    case "key": {
+      if (typeof input.text !== "string") return { text: "text is required", isError: true };
+      await page.keyboard.press(mapKey(input.text));
+      return { text: `pressed: ${input.text}` };
+    }
     case "hold_key": {
-      const k = mapKey(input.text as string);
+      if (typeof input.text !== "string") return { text: "text is required", isError: true };
+      const k = mapKey(input.text);
       const duration = (input.duration as number) ?? 1;
       await page.keyboard.down(k);
       await new Promise((r) => setTimeout(r, duration * 1000));
       await page.keyboard.up(k);
-      return { text: `held ${input.text as string} for ${duration}s` };
+      return { text: `held ${input.text} for ${duration}s` };
     }
     case "scroll": {
       const dir = input.scroll_direction as string;
       const amount = ((input.scroll_amount as number) ?? 3) * 100;
-      if (coord) await page.mouse.move(coord[0], coord[1]);
       const deltaMap: Record<string, [number, number]> = {
         up: [0, -amount],
         down: [0, amount],
         left: [-amount, 0],
         right: [amount, 0],
       };
-      const [dx, dy] = deltaMap[dir] ?? [0, 0];
-      await page.mouse.wheel(dx, dy);
+      const delta = deltaMap[dir];
+      if (!delta) return { text: `invalid scroll_direction: ${dir}`, isError: true };
+      if (coord) await page.mouse.move(coord[0], coord[1]);
+      await page.mouse.wheel(delta[0], delta[1]);
       return { text: `scrolled ${dir} by ${amount}` };
     }
     case "wait": {
