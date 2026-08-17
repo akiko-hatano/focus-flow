@@ -26,6 +26,8 @@ export function getClient(): { client: AnthropicBedrock; modelId: string } {
   if (!region) throw new Error("環境変数 AWS_REGION が設定されていません");
   if (!modelId) throw new Error("環境変数 AWS_BEDROCK_MODEL_ARN_ID が設定されていません");
 
+  // アクセスキーが未設定なら awsRegion のみ渡す（bedrock-sdk が AWS の
+  // 標準クレデンシャルチェーン ＝ AWS_PROFILE や IAM ロールから自動で認証情報を解決する）
   const accessKey = process.env.AWS_ACCESS_KEY_ID;
   const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
   const client =
@@ -76,12 +78,22 @@ function mapKey(key: string): string {
     .join("+");
 }
 
+// Claude が返す tool_use の action を実際の Playwright 操作に変換する。
+// 座標は Claude に渡したスクリーンショットの座標系（= DISPLAY_WIDTH/HEIGHT、
+// createBrowser のビューポートと同じ値）でそのまま返ってくるため、
+// スケール変換なしに page.mouse に渡してよい。
+//
+// エラーは throw せず isError: true で返す。runAgentTask はこれを
+// tool_result の is_error として Claude に返すことで、ループ全体を落とさずに
+// Claude 自身に「操作が失敗した」ことを伝えて次の判断をさせられる。
 async function executeAction(
   page: Page,
   action: string,
   input: Record<string, unknown>,
 ): Promise<{ text?: string; isError?: boolean }> {
   const coord = input.coordinate as [number, number] | undefined;
+  // left_click 等では Shift/Ctrl 等の修飾キーが coordinate と同じ input.text に入って返ってくる
+  // （type/key アクションの「入力するテキスト」とは別の意味で text フィールドが再利用されている）
   const modifierKey = input.text ? mapKey(input.text as string) : undefined;
 
   switch (action) {
@@ -173,12 +185,28 @@ async function executeAction(
   }
 }
 
+/**
+ * Computer Use の agent loop 本体。
+ *
+ * Computer Use はライブラリではなく Claude 自身の機能で、Claude は
+ * 「この座標をクリックして」等の tool_use を返すだけで実際の操作はしない。
+ * そのため呼び出し側が「Claude の指示を実行 → 結果（新しいスクリーンショット）を
+ * 返す → 次の指示を受け取る」というループを自分で回す必要がある。
+ * このループは stop_reason が tool_use でなくなった（= Claude がテキストのみで
+ * 応答した）時点で完了とみなして終了する。
+ *
+ * maxIterations は、Claude が完了判断を誤って無限にツールを呼び続けるのを防ぐ
+ * セーフガード（無限ループ・想定外の API コスト増を回避するため）。
+ */
 export async function runAgentTask(
   page: Page,
   task: string,
   maxIterations = 15,
 ): Promise<string> {
   const { client, modelId } = getClient();
+  // computer_20251124 はスキーマレスツール（Claude 側に組み込み済みのため
+  // 入力スキーマを自分で定義する必要がない）。bedrock-sdk の型定義がまだ
+  // このツール形状を正式にサポートしていないため as unknown で回避している。
   const tools = [
     {
       type: TOOL_TYPE,
@@ -188,6 +216,8 @@ export async function runAgentTask(
     },
   ] as unknown as Anthropic.Beta.Messages.BetaToolUnion[];
 
+  // 最初のメッセージは「タスク文＋現在の画面」。指示（テキスト）を画像より前に
+  // 置くと要素特定の精度が上がるとされている（公式ドキュメントのプロンプト最適化 Tips）。
   const initialShot = await screenshotBase64(page);
   let messages: Anthropic.Beta.Messages.BetaMessageParam[] = [
     {
@@ -208,12 +238,16 @@ export async function runAgentTask(
       betas: [BETA_HEADER],
     });
 
+    // 会話履歴に Claude の応答（tool_use ブロックを含む）を積んでおく必要がある。
+    // 次のリクエストで tool_result を返すとき、対応する tool_use が履歴に
+    // 存在しないと API がエラーになる。
     messages.push({ role: "assistant", content: response.content });
 
     const toolUseBlocks = response.content.filter(
       (b): b is Anthropic.Beta.Messages.BetaToolUseBlock => b.type === "tool_use",
     );
     if (toolUseBlocks.length === 0) {
+      // tool_use が無い = Claude がタスク完了と判断してテキストのみで応答した
       const finalText = response.content
         .filter((b): b is Anthropic.Beta.Messages.BetaTextBlock => b.type === "text")
         .map((b) => b.text)
@@ -226,6 +260,8 @@ export async function runAgentTask(
       const input = block.input as Record<string, unknown>;
       const action = input.action as string;
       const { text, isError } = await executeAction(page, action, input);
+      // アクション実行後の画面を毎回撮り直して返す。Claude は前回の指示が
+      // 実際に反映されたかをこの新しいスクリーンショットで確認してから次の指示を出す。
       const shot = await screenshotBase64(page);
       const content: Anthropic.Beta.Messages.BetaToolResultBlockParam["content"] = [
         ...(text ? [{ type: "text" as const, text }] : []),
