@@ -38,3 +38,10 @@ next-env.d.ts
 
 # vitest
 .vitest
+
+# local python (Skyvern trial)
+.venv/
+__pycache__/
+/skyvern/screenshots/
+/skyvern/videos/
+/temp/

@@ -9,7 +9,11 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "skyvern:install": "mise exec python@3.12 -- python -m venv .venv && .venv/bin/pip install -r skyvern/requirements.txt && .venv/bin/playwright install chromium",
+    "skyvern:todo": ".venv/bin/python skyvern/todo-crud.py",
+    "skyvern:profile": ".venv/bin/python skyvern/profile.py",
+    "skyvern:settings": ".venv/bin/python skyvern/settings.py"
   },
   "dependencies": {
     "next": "16.2.9",
