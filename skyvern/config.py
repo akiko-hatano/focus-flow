@@ -1,6 +1,7 @@
 """Skyvern 共通設定。
 
 Skyvern Cloud は使わない。ローカル Chromium + 既存 Bedrock 推論プロファイルのみ。
+TypeScript SDK（@skyvern/client）は Cloud 向けなので、検証は Python の Skyvern.local() で行う。
 
 環境変数:
   AWS_REGION
@@ -32,6 +33,7 @@ load_dotenv(ROOT / ".env.local")
 load_dotenv(ROOT / ".env")
 
 VIEWPORT = {"width": 1280, "height": 800}
+# Skyvern 内蔵ブラウザと被らないよう、Playwright 録画用 CDP は 9223 を使う
 CDP_PORT = 9223
 
 
@@ -43,7 +45,12 @@ def require_env(name: str) -> str:
 
 
 def allow_localhost() -> None:
-    """page.goto の SSRF 検査は embedded server 初期化より先に走る。"""
+    """focus-flow は localhost:3000 で動かすが、Skyvern はデフォルトで localhost をブロックする。
+
+    page.goto の SSRF 検査は embedded server 初期化より先に走る。
+    Skyvern.local(settings={"ALLOWED_HOSTS": ...}) はサーバ起動後に反映されるため間に合わず、
+    ここで skyvern.config.settings を直接書き換える。
+    """
     skyvern_settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
     skyvern_settings.BLOCKED_HOSTS = []
 
@@ -53,6 +60,7 @@ def _headless() -> bool:
 
 
 def _webm_to_mp4(webm: Path) -> Path:
+    """Playwright の録画は webm 固定なので、PR デモ用に ffmpeg で mp4 へ変換する。"""
     mp4 = webm.parent / "todo.mp4"
     result = subprocess.run(
         [
@@ -79,6 +87,13 @@ def _webm_to_mp4(webm: Path) -> Path:
 
 
 def create_skyvern() -> Skyvern:
+    """組み込み LLM_KEY は使わず、org の推論プロファイル ARN をそのまま渡す。
+
+    Skyvern 同梱の BEDROCK_ANTHROPIC_CLAUDE4.6_SONNET_INFERENCE_PROFILE は内部で
+    bedrock/us.anthropic.claude-sonnet-4-6（米国 CRIS）に解決される。
+    今回使うのは東京の application-inference-profile なので、
+    LLMConfig(model_name=f"bedrock/{ARN}") で上書きする。
+    """
     region = require_env("AWS_REGION")
     model_arn = require_env("AWS_BEDROCK_MODEL_ARN_ID")
     allow_localhost()
@@ -93,10 +108,13 @@ def create_skyvern() -> Skyvern:
             temperature=1,
         ),
         settings={
+            # bedrock/{ARN} を litellm 経由で呼ぶために必要
             "ENABLE_BEDROCK": True,
             "AWS_REGION": region,
+            # page.act が迷ってステップを消費し続けるのを抑える
             "MAX_STEPS_PER_RUN": 8,
             "BROWSER_TYPE": "chromium-headless" if _headless() else "chromium-headful",
+            # allow_localhost() は goto 前の SSRF 用。こちらは Skyvern 起動後の設定
             "ALLOWED_HOSTS": ["localhost", "127.0.0.1"],
             "BLOCKED_HOSTS": [],
         },
@@ -105,6 +123,13 @@ def create_skyvern() -> Skyvern:
 
 @asynccontextmanager
 async def session() -> AsyncIterator[tuple[Skyvern, SkyvernBrowser, SkyvernBrowserPage]]:
+    """通常は Skyvern にブラウザ起動を任せる。録画時だけ Playwright 側で起動して CDP 接続する。
+
+    launch_local_browser は record_video を渡せない。Python Playwright も
+    record_video= ではなく record_video_dir= で、launch_persistent_context では受け付けない。
+    そのため chromium.launch + new_context で録画し、--remote-debugging-port 経由で Skyvern を繋ぐ。
+    Skyvern が別ページを開くことがあるので、close 後に一番大きい webm を mp4 にする。
+    """
     client = create_skyvern()
     video_dir = os.environ.get("RECORD_VIDEO_DIR")
     playwright = None
@@ -133,7 +158,9 @@ async def session() -> AsyncIterator[tuple[Skyvern, SkyvernBrowser, SkyvernBrows
                     "height": VIEWPORT["height"],
                 },
             )
+            # context に page がないと録画が始まらない
             await video_context.new_page()
+            # Skyvern 側の launch_local_browser は使わず、録画中の Chromium に接続する
             browser = await client.connect_to_browser_over_cdp(f"http://127.0.0.1:{CDP_PORT}")
         else:
             browser = await client.launch_local_browser(
@@ -149,9 +176,11 @@ async def session() -> AsyncIterator[tuple[Skyvern, SkyvernBrowser, SkyvernBrows
         if video_context is not None:
             if not recorded_videos:
                 recorded_videos = [p.video for p in video_context.pages if p.video]
+            # close しないと webm が書き終わらず path() が空になる
             await video_context.close()
             webms = [Path(await video.path()) for video in recorded_videos]
             if webms:
+                # Skyvern が複数 page を開くと webm が複数できるので、中身がある方を残す
                 webm = max(webms, key=lambda path: path.stat().st_size if path.exists() else 0)
                 mp4 = _webm_to_mp4(webm)
                 for leftover in webms:
@@ -167,10 +196,12 @@ async def session() -> AsyncIterator[tuple[Skyvern, SkyvernBrowser, SkyvernBrows
 
 
 async def act(page: SkyvernBrowserPage, instruction: str) -> None:
+    """page.act() は1操作だけ実行する。「入力して追加」を1文で渡すと入力で止まる。"""
     await page.act(instruction)
 
 
 async def get_task_id_by_title(page: SkyvernBrowserPage, title: str) -> str:
+    """操作は自然言語、検証は他技術と同じく data-testid で行う。"""
     items = page.locator('[data-testid^="task-item-"]')
     count = await items.count()
     for i in range(count):
