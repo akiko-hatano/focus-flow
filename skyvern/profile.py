@@ -21,10 +21,10 @@ async def main() -> None:
         log("UPDATE", "名前とメールアドレスを更新して保存する")
         await page.goto(APP_URL)
         await page.locator('[data-testid="profile-form"]').wait_for()
-        await act(page, "Full Name 入力欄に「Test User」と入力してください。Save Changes はまだ押さないでください。")
+        await act(page, "Full Name 入力欄に「Test User」と入力してください。")
         await act(
             page,
-            "Email Address 入力欄に「test@example.com」と入力してください。Save Changes はまだ押さないでください。",
+            "Email Address 入力欄に「test@example.com」と入力してください。",
         )
         await act(page, "Save Changes ボタンをクリックしてください。")
         if await page.locator('[data-testid="profile-name-error"]').is_visible():
@@ -36,10 +36,10 @@ async def main() -> None:
         log("VALIDATION (name)", "名前を空にすると「名前を入力してください」が出ることを確認する")
         await page.goto(APP_URL)
         await page.locator('[data-testid="profile-form"]').wait_for()
-        await act(page, "Full Name 入力欄の内容を全て消してください。Save Changes はまだ押さないでください。")
+        await act(page, "Full Name 入力欄の内容を全て消してください。")
         await act(
             page,
-            "Email Address 入力欄に「test@example.com」と入力してください。Save Changes はまだ押さないでください。",
+            "Email Address 入力欄に「test@example.com」と入力してください。",
         )
         await act(page, "Save Changes ボタンをクリックしてください。")
         if not await page.locator('[data-testid="profile-name-error"]').is_visible():
@@ -52,8 +52,8 @@ async def main() -> None:
         )
         await page.goto(APP_URL)
         await page.locator('[data-testid="profile-form"]').wait_for()
-        await act(page, "Full Name 入力欄に「Test User」と入力してください。Save Changes はまだ押さないでください。")
-        await act(page, "Email Address 入力欄に「test@test」と入力してください。Save Changes はまだ押さないでください。")
+        await act(page, "Full Name 入力欄に「Test User」と入力してください。")
+        await act(page, "Email Address 入力欄に「test@test」と入力してください。")
         await act(page, "Save Changes ボタンをクリックしてください。")
         if not await page.locator('[data-testid="profile-email-error"]').is_visible():
             fail('"有効なメールアドレスを入力してください" が表示されていません')
@@ -63,7 +63,7 @@ async def main() -> None:
         await page.goto(APP_URL)
         await page.locator('[data-testid="profile-form"]').wait_for()
         original_name = await page.locator('[data-testid="profile-name-input"]').input_value()
-        await act(page, "Full Name 入力欄に「Changed Name」と入力してください。Cancel はまだ押さないでください。")
+        await act(page, "Full Name 入力欄に「Changed Name」と入力してください。")
         await act(page, "Cancel ボタンをクリックしてください。")
         name_value = await page.locator('[data-testid="profile-name-input"]').input_value()
         if name_value != original_name:

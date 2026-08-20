@@ -87,11 +87,11 @@ def _webm_to_mp4(webm: Path) -> Path:
 
 
 def create_skyvern() -> Skyvern:
-    """組み込み LLM_KEY は使わず、org の推論プロファイル ARN をそのまま渡す。
+    """組み込み LLM_KEY は使わず、既存の推論プロファイル ARN をそのまま渡す。
 
     Skyvern 同梱の BEDROCK_ANTHROPIC_CLAUDE4.6_SONNET_INFERENCE_PROFILE は内部で
-    bedrock/us.anthropic.claude-sonnet-4-6（米国 CRIS）に解決される。
-    今回使うのは東京の application-inference-profile なので、
+    bedrock/us.anthropic.claude-sonnet-4-6 に解決される。
+    今回使うのは application-inference-profile なので、
     LLMConfig(model_name=f"bedrock/{ARN}") で上書きする。
     """
     region = require_env("AWS_REGION")

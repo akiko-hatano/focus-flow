@@ -28,7 +28,7 @@ async def main() -> None:
         await page.locator('[data-testid="task-input"]').wait_for()
 
         log("CREATE", f'"{TASK_TITLE}" を追加する')
-        await act(page, f"タスク入力欄に「{TASK_TITLE}」と入力してください。Add ボタンはまだ押さないでください。")
+        await act(page, f"タスク入力欄に「{TASK_TITLE}」と入力してください。")
         await act(page, "Add ボタンをクリックしてタスクを追加してください。")
         task_id = await get_task_id_by_title(page, TASK_TITLE)
         if not task_id:
@@ -46,7 +46,7 @@ async def main() -> None:
         await act(page, f"「{TASK_TITLE}」というタスクの編集ボタンをクリックしてください。")
         await act(
             page,
-            f"編集中の入力欄の内容を全て消して「{UPDATED_TITLE}」と入力してください。保存ボタンはまだ押さないでください。",
+            f"編集中の入力欄の内容を全て消して「{UPDATED_TITLE}」と入力してください。",
         )
         await act(page, "編集の保存ボタンをクリックしてください。")
         updated_id = await get_task_id_by_title(page, UPDATED_TITLE)
@@ -69,7 +69,7 @@ async def main() -> None:
         log("VALIDATION (edit)", "タスク編集で空タイトルにするとエラーが出ることを確認する")
         await act(
             page,
-            f"タスク入力欄に「{VALIDATION_TASK_TITLE}」と入力してください。Add ボタンはまだ押さないでください。",
+            f"タスク入力欄に「{VALIDATION_TASK_TITLE}」と入力してください。",
         )
         await act(page, "Add ボタンをクリックしてタスクを追加してください。")
         val_task_id = await get_task_id_by_title(page, VALIDATION_TASK_TITLE)
@@ -77,7 +77,7 @@ async def main() -> None:
             fail(f'"{VALIDATION_TASK_TITLE}" を追加できませんでした')
 
         await act(page, f"「{VALIDATION_TASK_TITLE}」というタスクの編集ボタンをクリックしてください。")
-        await act(page, "編集中の入力欄の内容を全て消してください。保存ボタンはまだ押さないでください。")
+        await act(page, "編集中の入力欄の内容を全て消してください。")
         await act(page, "編集の保存ボタンをクリックしてください。")
         if not await page.locator(f'[data-testid="task-item-{val_task_id}"] [role="alert"]').is_visible():
             fail("タスク編集のバリデーションエラーが表示されていません")
